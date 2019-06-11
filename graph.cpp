@@ -63,9 +63,18 @@ class Graph{
       return;
     }
 
-    void print_vertices(){
-      for(int i = 0; i < v_list.size(); i++){
-        cout << v_list.at(i).key << endl;
+    void print_vertices(vector<Vertex> v){
+      for(int i = 0; i < v.size(); i++){
+        cout << v.at(i).key << " ";
+      }
+      cout << endl;
+      return;
+    }
+
+    void print_edges(vector<Edge> e){
+      vector<Edge>::iterator it;
+      for(it = e.begin(); it != e.end(); ++it){
+        cout << it->source->key << " (" << it->weight << ") " << it->destination->key << endl;
       }
       return;
     }
@@ -84,40 +93,68 @@ class Graph{
       return;
     }
 
-/*
-    Edge min_edge(Vertex v){
-      vector<Edge> ve = v.edges;
-      Edge min_e = ve.at(0);
-      for(int i = 1; i < ve.size(); i++){
-        if(ve.at(i).weight < min_e.weight){
-          min_e = ve.at(i);
-        }
-      }
-      //cout << min_e.weight << endl;
-      //cout << &min_e;
-      return min_e;
-    }
-*/
-
     void min_dist(int s, int d){
       return;
     }
 
+    vector<Edge> combine_edges(vector<Edge> e1, vector<Edge> e2){
+      vector<Edge>::iterator it;
 
+      for(it = e2.begin(); it != e2.end(); ++it){
+        e1.push_back(*it);
+      }
+      return e1;
+    }
 
-    // void MST(){
-    //   vector<Edge> all_e;
-    //   vector<Vertex> all_v;
-    //   all_v.push_back(v_list.at(0));
-    //   int min_w = 0;
-    //
-    //   Vertex* temp_v = v_list.at(0);
-    //
-    //   while
-    //
-    //
-    //     return;
-    // }
+    Edge find_min_edge(vector<Edge> e){
+      //cout << "entered find_min_edge func..." << endl;
+      Edge min_e = e.at(0);
+      vector<Edge>::iterator it;
+      for(it = e.begin(); it != e.end(); ++it){
+        if(it->weight < min_e.weight){
+          min_e = *it;
+        }
+      }
+      return min_e;
+    }
+
+    //remove all Edges, e, that have destination Vertex, v
+    //returns all edges under consideration
+    vector<Edge> cleanup_dead_edges(vector<Vertex> v, vector<Edge> e){
+      vector<Vertex>::iterator it_v;
+      vector<Edge>::iterator it_e;
+
+      it_e = e.end();
+      while(it_e != e.begin()){
+        it_e--;
+        it_v = v.begin();
+        while(it_v != v.end()){
+          if(it_e->destination->key == it_v->key){
+            e.erase(it_e);
+            break;
+          }
+          it_v++;
+        }
+      }
+      return e;
+    }
+
+    void MST(){
+      vector<Vertex> mst_v;
+      vector<Edge> mst_e;
+      vector<Edge> all_e;
+      Vertex current_v = v_list.at(0);
+      while(mst_v.size() < v_list.size()){
+        mst_v.push_back(current_v);
+        all_e = combine_edges(all_e, current_v.edges);
+        all_e = cleanup_dead_edges(mst_v, all_e);
+        if(mst_v.size() < v_list.size()){
+          mst_e.push_back(find_min_edge(all_e));
+          current_v = *((mst_e.end()-1)->destination);
+        }
+      }
+      print_edges(mst_e);
+    }
 
 
 
@@ -138,8 +175,9 @@ int main(){
   test.add_edge2(6, 3, 2);
   test.add_edge2(5, 3, 3);
   test.add_edge2(3, 2, 1);
-  cout << "print" << endl;
+  cout << "printing graph..." << endl;
   test.print_graph();
-
-  cout << "end of main" << endl;
+  cout << endl << "printing minimum spanning tree..." << endl;
+  test.MST();
+  //cout << "end of main" << endl;
 }
